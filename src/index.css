@@ -145,3 +145,49 @@
 ::-webkit-scrollbar-thumb:hover {
   background: oklch(0.45 0 0);
 }
+
+/* React Flow edge glow effect */
+.react-flow__edge-path {
+  filter: drop-shadow(0 0 3px rgba(59, 130, 246, 0.4));
+}
+
+.react-flow__edge.animated .react-flow__edge-path {
+  stroke-dasharray: 5;
+  animation: flow-dash 0.5s linear infinite;
+}
+
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+/* React Flow node entrance animation */
+.react-flow__node {
+  animation: node-enter 0.3s ease-out;
+}
+
+@keyframes node-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hide React Flow attribution */
+.react-flow__attribution {
+  display: none;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .react-flow__node,
+  .react-flow__edge-path {
+    animation: none !important;
+    filter: none !important;
+  }
+}
