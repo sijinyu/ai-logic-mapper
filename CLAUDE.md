@@ -57,3 +57,9 @@ src/
 - Build command: `pnpm build`
 - Output directory: `dist`
 - Framework: Vite
+
+## Critical Rules (MUST FOLLOW)
+- **MEMORY.md 수시 업데이트 (세션 끊김 대비)** — `~/.claude/projects/-Users-nhn-Documents-p-project-ai-logic-mapper/memory/MEMORY.md`에 기록. 자동 저장 안 됨. **매 작업(Step/Phase) 완료 시 즉시 업데이트**할 것. 세션이 갑자기 끊길 수 있으므로 "나중에 한꺼번에" 쓰지 말고 작업 끝날 때마다 바로 기록. **기록 대상: 코드 변경, 진행 상태, 다음 할 일, 기술 결정사항만.** 일반 대화/설명/질의응답은 기록하지 않음.
+- **.env 절대 커밋 금지** — 이전에 API 키 노출 사고 발생. `.gitignore`에 이미 등록됨. `git add` 시 반드시 확인.
+- **오버엔지니어링 금지** — 필수 기능만 효율적으로. 불필요한 추상화, 미래 대비 설계 하지 말 것.
+- **플랜 파일 참조** — `~/.claude/plans/precious-crafting-riddle.md`에 Phase 2 플랜 있음. 새 세션 시작 시 읽고 이어서 진행.

@@ -87,6 +87,7 @@ export default function InputPanel({ onGenerate, isLoading }) {
   return (
     <div className="flex flex-col gap-3">
       <Textarea
+        id="tour-input"
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -97,6 +98,7 @@ export default function InputPanel({ onGenerate, isLoading }) {
 
       {/* File Upload */}
       <div
+        id="tour-file-upload"
         onDragOver={(e) => {
           e.preventDefault()
           setDragOver(true)
@@ -144,6 +146,7 @@ export default function InputPanel({ onGenerate, isLoading }) {
       {error && <p className="text-xs text-red-400 px-1">{error}</p>}
 
       <Button
+        id="tour-generate"
         onClick={handleSubmit}
         disabled={isLoading || (!input.trim() && !file)}
         className="w-full gap-2 bg-blue-600 hover:bg-blue-500 text-white font-medium"

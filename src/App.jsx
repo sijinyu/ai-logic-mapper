@@ -6,6 +6,7 @@ import FlowCanvas from '@/components/canvas/FlowCanvas'
 import { generateFlowchart, generateFlowchartFromFile } from '@/lib/gemini'
 import { applyAutoLayout, toReactFlowElements } from '@/lib/layout'
 import { getHistory, saveHistory, deleteHistoryItem } from '@/lib/storage'
+import { isTourCompleted, startTour } from '@/lib/tour'
 
 function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState([])
@@ -16,6 +17,14 @@ function App() {
   // Load history on mount
   useEffect(() => {
     setHistory(getHistory())
+  }, [])
+
+  // Auto-start tour for first-time visitors
+  useEffect(() => {
+    if (!isTourCompleted()) {
+      const timer = setTimeout(startTour, 500)
+      return () => clearTimeout(timer)
+    }
   }, [])
 
   const handleGenerate = useCallback(async (input, file) => {
@@ -78,7 +87,7 @@ function App() {
           onHistoryDelete={handleHistoryDelete}
           isLoading={isLoading}
         />
-        <main className="flex-1 h-full">
+        <main id="tour-canvas" className="flex-1 h-full">
           <FlowCanvas
             nodes={nodes}
             edges={edges}
