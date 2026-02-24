@@ -44,8 +44,25 @@ function App() {
     }
   }, [])
 
+  // Request notification permission on first generate
+  const requestNotificationPermission = useCallback(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission()
+    }
+  }, [])
+
+  const sendNotification = useCallback((title, body) => {
+    if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+      new Notification(title, {
+        body,
+        icon: '/vite.svg',
+      })
+    }
+  }, [])
+
   const handleGenerate = useCallback(async (input, file) => {
     setIsLoading(true)
+    requestNotificationPermission()
     try {
       const rawData = file
         ? await generateFlowchartFromFile(file)
@@ -68,10 +85,18 @@ function App() {
       }
       const updatedHistory = saveHistory(historyItem)
       setHistory(updatedHistory)
+
+      sendNotification(
+        'AI Logic Mapper',
+        `플로우차트 생성 완료 (노드 ${layoutedNodes.length}개)`
+      )
+    } catch (err) {
+      sendNotification('AI Logic Mapper', '플로우차트 생성 실패')
+      throw err
     } finally {
       setIsLoading(false)
     }
-  }, [setNodes, setEdges])
+  }, [setNodes, setEdges, requestNotificationPermission, sendNotification])
 
   const handleHistorySelect = useCallback(
     (item) => {
