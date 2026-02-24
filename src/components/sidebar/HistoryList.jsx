@@ -15,7 +15,7 @@ function getRelativeTime(timestamp) {
 }
 
 function HistoryItem({ item, isActive, onSelect, onDelete }) {
-  const label = item.input?.slice(0, 40) || item.label || '제목 없음'
+  const label = item.input || item.label || '제목 없음'
 
   return (
     <div
@@ -29,7 +29,7 @@ function HistoryItem({ item, isActive, onSelect, onDelete }) {
       )}
     >
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-slate-300 truncate group-hover:text-slate-100 transition-colors">
+        <p className="text-sm text-slate-300 line-clamp-2 group-hover:text-slate-100 transition-colors">
           {label}
         </p>
         <div className="flex items-center gap-1 mt-0.5">
