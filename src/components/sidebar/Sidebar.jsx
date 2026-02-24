@@ -15,6 +15,7 @@ export default function Sidebar({
   onHistorySelect,
   onHistoryDelete,
   isLoading,
+  hasFlowchart,
 }) {
   const [apiKeyOpen, setApiKeyOpen] = useState(false)
   const usingOwn = isUsingUserKey()
@@ -68,7 +69,7 @@ export default function Sidebar({
 
       {/* Input Section */}
       <div className="px-5 py-4">
-        <InputPanel onGenerate={onGenerate} isLoading={isLoading} />
+        <InputPanel onGenerate={onGenerate} isLoading={isLoading} hasFlowchart={hasFlowchart} />
       </div>
 
       {/* Divider + History */}

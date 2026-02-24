@@ -6,7 +6,7 @@ import FlowCanvas from '@/components/canvas/FlowCanvas'
 import EditNodeDialog from '@/components/canvas/EditNodeDialog'
 import EditEdgeDialog from '@/components/canvas/EditEdgeDialog'
 import CustomEdge from '@/components/canvas/CustomEdge'
-import { generateFlowchart, generateFlowchartFromFile } from '@/lib/gemini'
+import { generateFlowchart, generateFlowchartFromFile, refineFlowchart } from '@/lib/gemini'
 import { applyAutoLayout, toReactFlowElements } from '@/lib/layout'
 import { getHistory, saveHistory, deleteHistoryItem } from '@/lib/storage'
 import { isTourCompleted, startTour } from '@/lib/tour'
@@ -64,9 +64,14 @@ function App() {
     setIsLoading(true)
     requestNotificationPermission()
     try {
-      const rawData = file
-        ? await generateFlowchartFromFile(file)
-        : await generateFlowchart(input)
+      let rawData
+      if (file) {
+        rawData = await generateFlowchartFromFile(file)
+      } else if (nodes.length > 0) {
+        rawData = await refineFlowchart(nodes, edges, input)
+      } else {
+        rawData = await generateFlowchart(input)
+      }
 
       const { nodes: rfNodes, edges: rfEdges } = toReactFlowElements(rawData)
       const { nodes: layoutedNodes, edges: layoutedEdges } = applyAutoLayout(
@@ -96,7 +101,7 @@ function App() {
     } finally {
       setIsLoading(false)
     }
-  }, [setNodes, setEdges, requestNotificationPermission, sendNotification])
+  }, [nodes, edges, setNodes, setEdges, requestNotificationPermission, sendNotification])
 
   const handleHistorySelect = useCallback(
     (item) => {
@@ -227,6 +232,7 @@ function App() {
           onHistorySelect={handleHistorySelect}
           onHistoryDelete={handleHistoryDelete}
           isLoading={isLoading}
+          hasFlowchart={nodes.length > 0}
         />
         <main id="tour-canvas" className="flex-1 h-full">
           <FlowCanvas

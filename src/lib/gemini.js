@@ -219,3 +219,47 @@ export async function generateFlowchartFromFile(file) {
   const responseText = result.response.text()
   return validateFlowchartData(JSON.parse(responseText))
 }
+
+export async function refineFlowchart(nodes, edges, instruction) {
+  if (!instruction || instruction.trim().length < 3) {
+    throw new Error('수정 지시를 3자 이상 입력해주세요.')
+  }
+
+  const currentFlowchart = {
+    nodes: nodes.map((n) => ({
+      id: n.id,
+      label: n.data?.label || '',
+      type: n.type === 'default' ? 'process' : n.type,
+      description: n.data?.description || '',
+    })),
+    edges: edges.map((e) => ({
+      source: e.source,
+      target: e.target,
+      label: e.label || e.data?.label || '',
+    })),
+  }
+
+  checkRateLimit()
+  const model = getModel()
+
+  const prompt = `아래는 현재 플로우차트 JSON입니다. 사용자의 수정 지시에 따라 기존 플로우차트를 수정하세요.
+기존 노드를 최대한 유지하면서 필요한 부분만 추가/수정/삭제하세요.
+
+## 현재 플로우차트
+${JSON.stringify(currentFlowchart, null, 2)}
+
+## 수정 지시
+${instruction.trim()}`
+
+  const result = await model.generateContent(prompt)
+  const text = result.response.text()
+
+  let parsed
+  try {
+    parsed = JSON.parse(text)
+  } catch {
+    throw new Error('AI 응답을 파싱할 수 없습니다. 다시 시도해주세요.')
+  }
+
+  return validateFlowchartData(parsed)
+}

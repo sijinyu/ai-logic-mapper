@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { Sparkles, Loader2, Upload, X, FileText } from 'lucide-react'
+import { Sparkles, Loader2, Upload, X, FileText, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const ACCEPTED_TYPES = [
@@ -11,7 +11,7 @@ const ACCEPTED_TYPES = [
 ]
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 
-export default function InputPanel({ onGenerate, isLoading }) {
+export default function InputPanel({ onGenerate, isLoading, hasFlowchart }) {
   const [input, setInput] = useState('')
   const [file, setFile] = useState(null)
   const [dragOver, setDragOver] = useState(false)
@@ -91,7 +91,11 @@ export default function InputPanel({ onGenerate, isLoading }) {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="비즈니스 로직을 입력하세요...&#10;&#10;예: 사용자가 로그인 버튼을 클릭하면 이메일과 비밀번호를 검증한다. 검증이 성공하면 대시보드로 이동하고, 실패하면 에러 메시지를 표시한다."
+        placeholder={
+          hasFlowchart
+            ? '수정할 내용을 입력하세요...\n\n예: 결제 실패 시 재시도 로직 추가해줘'
+            : '비즈니스 로직을 입력하세요...\n\n예: 사용자가 로그인 버튼을 클릭하면 이메일과 비밀번호를 검증한다. 검증이 성공하면 대시보드로 이동하고, 실패하면 에러 메시지를 표시한다.'
+        }
         disabled={isLoading}
         className="min-h-[160px] resize-none bg-slate-800/50 border-border text-sm leading-relaxed placeholder:text-slate-500"
       />
@@ -155,7 +159,12 @@ export default function InputPanel({ onGenerate, isLoading }) {
         {isLoading ? (
           <>
             <Loader2 size={16} className="animate-spin" />
-            분석 중...
+            {hasFlowchart ? '수정 중...' : '분석 중...'}
+          </>
+        ) : hasFlowchart ? (
+          <>
+            <RefreshCw size={16} />
+            Refine Logic
           </>
         ) : (
           <>
