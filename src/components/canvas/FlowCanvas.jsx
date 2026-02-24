@@ -29,7 +29,15 @@ function EmptyCanvas() {
   )
 }
 
-function FlowCanvasInner({ nodes, edges, onNodesChange, onEdgesChange }) {
+function FlowCanvasInner({
+  nodes,
+  edges,
+  onNodesChange,
+  onEdgesChange,
+  onNodeDoubleClick,
+  onConnect,
+  edgeTypes,
+}) {
   const nodeTypes = useMemo(() => ({ custom: CustomNode }), [])
   const isEmpty = nodes.length === 0
 
@@ -41,7 +49,10 @@ function FlowCanvasInner({ nodes, edges, onNodesChange, onEdgesChange }) {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onNodeDoubleClick={onNodeDoubleClick}
+        onConnect={onConnect}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         fitView
         fitViewOptions={{ padding: 0.2 }}
@@ -71,7 +82,7 @@ function FlowCanvasInner({ nodes, edges, onNodesChange, onEdgesChange }) {
           zoomable
         />
         <div className="absolute top-4 right-4 z-10">
-          <CanvasToolbar />
+          <CanvasToolbar nodes={nodes} edges={edges} />
         </div>
       </ReactFlow>
     </div>

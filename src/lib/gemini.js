@@ -1,6 +1,26 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY)
+const USER_KEY_STORAGE = 'alm_user_api_key'
+
+export function getUserApiKey() {
+  return localStorage.getItem(USER_KEY_STORAGE) || ''
+}
+
+export function setUserApiKey(key) {
+  if (key) {
+    localStorage.setItem(USER_KEY_STORAGE, key.trim())
+  } else {
+    localStorage.removeItem(USER_KEY_STORAGE)
+  }
+}
+
+export function isUsingUserKey() {
+  return !!localStorage.getItem(USER_KEY_STORAGE)
+}
+
+function getActiveKey() {
+  return getUserApiKey() || import.meta.env.VITE_GEMINI_API_KEY || ''
+}
 
 const SYSTEM_INSTRUCTION = `당신은 비즈니스 로직과 프로세스를 플로우차트 데이터로 변환하는 전문가입니다.
 
@@ -65,7 +85,44 @@ const responseSchema = {
   required: ['nodes', 'edges'],
 }
 
+// Rate limiting: 5 requests per minute (only for default key)
+const RATE_LIMIT_KEY = 'alm_rate_timestamps'
+const RATE_LIMIT_MAX = 5
+const RATE_LIMIT_WINDOW = 60_000 // 1 minute
+
+function checkRateLimit() {
+  // Skip rate limit if user is using their own key
+  if (isUsingUserKey()) return
+
+  const now = Date.now()
+  let timestamps = []
+  try {
+    timestamps = JSON.parse(localStorage.getItem(RATE_LIMIT_KEY) || '[]')
+  } catch {
+    timestamps = []
+  }
+
+  const valid = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW)
+
+  if (valid.length >= RATE_LIMIT_MAX) {
+    const oldest = valid[0]
+    const waitSec = Math.ceil((RATE_LIMIT_WINDOW - (now - oldest)) / 1000)
+    throw new Error(
+      `요청 한도 초과 (분당 ${RATE_LIMIT_MAX}회). ${waitSec}초 후 다시 시도하거나, 내 API 키를 설정하세요.`
+    )
+  }
+
+  valid.push(now)
+  localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(valid))
+}
+
 function getModel() {
+  const key = getActiveKey()
+  if (!key) {
+    throw new Error('API 키가 설정되지 않았습니다. 설정에서 Gemini API 키를 입력해주세요.')
+  }
+
+  const genAI = new GoogleGenerativeAI(key)
   return genAI.getGenerativeModel({
     model: 'gemini-2.5-flash',
     systemInstruction: SYSTEM_INSTRUCTION,
@@ -105,6 +162,7 @@ export async function generateFlowchart(input) {
     throw new Error('최소 5자 이상 입력해주세요.')
   }
 
+  checkRateLimit()
   const model = getModel()
   const result = await model.generateContent(input.trim())
   const text = result.response.text()
@@ -129,6 +187,7 @@ export async function generateFlowchartFromFile(file) {
     throw new Error('파일 크기는 5MB 이하만 가능합니다.')
   }
 
+  checkRateLimit()
   const model = getModel()
 
   // Handle text files
