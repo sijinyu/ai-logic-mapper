@@ -38,11 +38,11 @@ const SYSTEM_INSTRUCTION = `당신은 비즈니스 로직과 프로세스를 플
 3. decision 노드의 edge에는 반드시 label을 붙여주세요 (예: "Yes", "No", "성공", "실패")
 4. 모든 노드는 최소 1개의 연결이 있어야 합니다
 5. 순환 구조가 필요하면 포함해도 됩니다
-6. description은 해당 단계를 개발자가 바로 구현할 수 있도록 상세하게 작성합니다 (필수)
-   - process 노드: 구체적 동작, 호출할 API/DB 작업, 입출력 데이터 구조 명시
-   - decision 노드: 정확한 분기 조건식과 판단 기준 명시
-   - start/end 노드: 트리거 이벤트 또는 최종 상태 명시
-   - 예시: "POST /api/payments 호출. 요청: { orderId, amount, method }. PG사 결제 승인 API 연동. 타임아웃 30초."
+6. description은 해당 단계의 기획 의도를 명확하게 작성합니다 (필수)
+   - 이 단계의 목적과 기대 결과
+   - 필요한 입력 데이터와 출력 데이터
+   - 비즈니스 규칙 및 제약 조건
+   - 구체적 API 엔드포인트나 DB 스키마는 작성하지 마세요 (프로젝트마다 다름)
 
 ## 응답 형식
 반드시 아래 JSON 형식만 반환하세요. 다른 텍스트는 포함하지 마세요.`
@@ -64,7 +64,7 @@ const responseSchema = {
           },
           description: {
             type: 'string',
-            description: '개발 구현에 필요한 기술 상세 (API, DB, 조건식, 데이터 구조 등)',
+            description: '기획 의도: 목적, 입출력 데이터, 비즈니스 규칙',
           },
         },
         required: ['id', 'label', 'type', 'description'],
