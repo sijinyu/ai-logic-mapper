@@ -28,3 +28,28 @@ export function toMermaid(nodes, edges) {
 
   return lines.join('\n')
 }
+
+export function exportFlowchartJSON(nodes, edges) {
+  return JSON.stringify(
+    {
+      meta: {
+        app: 'AI Logic Mapper',
+        version: '1.0',
+        exportedAt: new Date().toISOString(),
+      },
+      nodes: nodes.map((node) => ({
+        id: node.id,
+        type: node.data?.nodeType || 'process',
+        label: node.data?.label || '',
+        description: node.data?.description || '',
+      })),
+      edges: edges.map((edge) => ({
+        source: edge.source,
+        target: edge.target,
+        label: edge.label || '',
+      })),
+    },
+    null,
+    2
+  )
+}

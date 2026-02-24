@@ -13,8 +13,9 @@ import {
   Link,
   Check,
   ImageDown,
+  FileJson,
 } from 'lucide-react'
-import { toMermaid } from '@/lib/export'
+import { toMermaid, exportFlowchartJSON } from '@/lib/export'
 import { encodeShareData } from '@/lib/share'
 
 function ToolbarButton({ icon: Icon, label, onClick, loading, success }) {
@@ -151,6 +152,19 @@ export default function CanvasToolbar({ nodes = [], edges = [] }) {
     }
   }, [nodes, edges])
 
+  const handleExportJSON = useCallback(() => {
+    const json = exportFlowchartJSON(nodes, edges)
+    if (!json) return
+
+    const blob = new Blob([json], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.download = `flowchart-${Date.now()}.alm.json`
+    link.href = url
+    link.click()
+    URL.revokeObjectURL(url)
+  }, [nodes, edges])
+
   const handleShareLink = useCallback(async () => {
     const url = encodeShareData(nodes, edges)
     if (!url) {
@@ -201,6 +215,11 @@ export default function CanvasToolbar({ nodes = [], edges = [] }) {
             loading={exporting}
           />
           <div className="w-full h-px bg-border my-0.5" />
+          <ToolbarButton
+            icon={FileJson}
+            label="JSON 내보내기 (Claude Code용)"
+            onClick={handleExportJSON}
+          />
           <ToolbarButton
             icon={Copy}
             label="Mermaid 복사"
