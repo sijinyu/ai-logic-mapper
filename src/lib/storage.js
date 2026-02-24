@@ -34,6 +34,15 @@ export function saveHistory(item) {
   return newHistory
 }
 
+export function updateHistory(id, updates) {
+  const history = getHistory()
+  const newHistory = history.map((item) =>
+    item.id === id ? { ...item, ...updates, timestamp: Date.now() } : item
+  )
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(newHistory))
+  return newHistory
+}
+
 export function deleteHistoryItem(id) {
   const history = getHistory()
   const filtered = history.filter((item) => item.id !== id)

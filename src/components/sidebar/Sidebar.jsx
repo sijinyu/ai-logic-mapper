@@ -16,6 +16,7 @@ export default function Sidebar({
   onHistoryDelete,
   isLoading,
   hasFlowchart,
+  activeHistoryId,
 }) {
   const [apiKeyOpen, setApiKeyOpen] = useState(false)
   const usingOwn = isUsingUserKey()
@@ -85,6 +86,7 @@ export default function Sidebar({
         <div className="flex-1 min-h-0 px-2 pb-4">
           <HistoryList
             history={history}
+            activeId={activeHistoryId}
             onSelect={onHistorySelect}
             onDelete={onHistoryDelete}
           />

@@ -8,7 +8,7 @@ import EditEdgeDialog from '@/components/canvas/EditEdgeDialog'
 import CustomEdge from '@/components/canvas/CustomEdge'
 import { generateFlowchart, generateFlowchartFromFile, refineFlowchart } from '@/lib/gemini'
 import { applyAutoLayout, toReactFlowElements } from '@/lib/layout'
-import { getHistory, saveHistory, deleteHistoryItem } from '@/lib/storage'
+import { getHistory, saveHistory, updateHistory, deleteHistoryItem } from '@/lib/storage'
 import { isTourCompleted, startTour } from '@/lib/tour'
 import { decodeShareData } from '@/lib/share'
 
@@ -17,6 +17,7 @@ function App() {
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
   const [history, setHistory] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+  const [activeHistoryId, setActiveHistoryId] = useState(null)
   const [editingNode, setEditingNode] = useState(null)
   const [editingEdge, setEditingEdge] = useState(null)
 
@@ -82,13 +83,24 @@ function App() {
       setNodes(layoutedNodes)
       setEdges(layoutedEdges)
 
-      const historyItem = {
-        input: input || file?.name || '',
-        label: input?.slice(0, 40) || file?.name || '파일 업로드',
-        nodes: layoutedNodes,
-        edges: layoutedEdges,
+      const isRefine = !file && activeHistoryId && nodes.length > 0
+      let updatedHistory
+      if (isRefine) {
+        updatedHistory = updateHistory(activeHistoryId, {
+          nodes: layoutedNodes,
+          edges: layoutedEdges,
+        })
+      } else {
+        const historyItem = {
+          input: input || file?.name || '',
+          label: input?.slice(0, 40) || file?.name || '파일 업로드',
+          nodes: layoutedNodes,
+          edges: layoutedEdges,
+        }
+        updatedHistory = saveHistory(historyItem)
+        const newId = updatedHistory[0]?.id
+        setActiveHistoryId(newId)
       }
-      const updatedHistory = saveHistory(historyItem)
       setHistory(updatedHistory)
 
       sendNotification(
@@ -101,13 +113,14 @@ function App() {
     } finally {
       setIsLoading(false)
     }
-  }, [nodes, edges, setNodes, setEdges, requestNotificationPermission, sendNotification])
+  }, [nodes, edges, activeHistoryId, setNodes, setEdges, requestNotificationPermission, sendNotification])
 
   const handleHistorySelect = useCallback(
     (item) => {
       if (item.nodes && item.edges) {
         setNodes(item.nodes)
         setEdges(item.edges)
+        setActiveHistoryId(item.id)
       }
     },
     [setNodes, setEdges]
@@ -116,6 +129,7 @@ function App() {
   const handleHistoryDelete = useCallback((id) => {
     const updated = deleteHistoryItem(id)
     setHistory(updated)
+    setActiveHistoryId((prev) => (prev === id ? null : prev))
   }, [])
 
   // Node editing
@@ -233,6 +247,7 @@ function App() {
           onHistoryDelete={handleHistoryDelete}
           isLoading={isLoading}
           hasFlowchart={nodes.length > 0}
+          activeHistoryId={activeHistoryId}
         />
         <main id="tour-canvas" className="flex-1 h-full">
           <FlowCanvas

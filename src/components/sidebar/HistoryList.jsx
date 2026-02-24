@@ -14,7 +14,7 @@ function getRelativeTime(timestamp) {
   return `${days}일 전`
 }
 
-function HistoryItem({ item, onSelect, onDelete }) {
+function HistoryItem({ item, isActive, onSelect, onDelete }) {
   const label = item.input?.slice(0, 40) || item.label || '제목 없음'
 
   return (
@@ -23,7 +23,9 @@ function HistoryItem({ item, onSelect, onDelete }) {
       className={cn(
         'group flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer',
         'transition-colors duration-150',
-        'hover:bg-slate-800/60'
+        isActive
+          ? 'bg-blue-600/20 border border-blue-500/30'
+          : 'hover:bg-slate-800/60'
       )}
     >
       <div className="flex-1 min-w-0">
@@ -61,7 +63,7 @@ function HistoryItem({ item, onSelect, onDelete }) {
   )
 }
 
-export default function HistoryList({ history, onSelect, onDelete }) {
+export default function HistoryList({ history, activeId, onSelect, onDelete }) {
   if (!history || history.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -78,6 +80,7 @@ export default function HistoryList({ history, onSelect, onDelete }) {
           <HistoryItem
             key={item.id}
             item={item}
+            isActive={item.id === activeId}
             onSelect={onSelect}
             onDelete={onDelete}
           />
