@@ -36,6 +36,9 @@ function FlowCanvasInner({
   onEdgesChange,
   onNodeDoubleClick,
   onConnect,
+  onReconnectStart,
+  onReconnect,
+  onReconnectEnd,
   edgeTypes,
 }) {
   const nodeTypes = useMemo(() => ({ custom: CustomNode }), [])
@@ -51,6 +54,9 @@ function FlowCanvasInner({
         onEdgesChange={onEdgesChange}
         onNodeDoubleClick={onNodeDoubleClick}
         onConnect={onConnect}
+        onReconnectStart={onReconnectStart}
+        onReconnect={onReconnect}
+        onReconnectEnd={onReconnectEnd}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         defaultEdgeOptions={defaultEdgeOptions}

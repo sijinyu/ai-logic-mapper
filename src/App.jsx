@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect, useMemo } from 'react'
-import { useNodesState, useEdgesState, addEdge } from 'reactflow'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+import { useNodesState, useEdgesState, addEdge, reconnectEdge } from 'reactflow'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import Sidebar from '@/components/sidebar/Sidebar'
 import FlowCanvas from '@/components/canvas/FlowCanvas'
@@ -158,6 +158,31 @@ function App() {
     [setEdges]
   )
 
+  // Edge reconnect (drag edge endpoint to another node)
+  const edgeReconnectSuccessful = useRef(true)
+
+  const handleReconnectStart = useCallback(() => {
+    edgeReconnectSuccessful.current = false
+  }, [])
+
+  const handleReconnect = useCallback(
+    (oldEdge, newConnection) => {
+      edgeReconnectSuccessful.current = true
+      setEdges((eds) => reconnectEdge(oldEdge, newConnection, eds))
+    },
+    [setEdges]
+  )
+
+  const handleReconnectEnd = useCallback(
+    (_, edge) => {
+      if (!edgeReconnectSuccessful.current) {
+        setEdges((eds) => eds.filter((e) => e.id !== edge.id))
+      }
+      edgeReconnectSuccessful.current = true
+    },
+    [setEdges]
+  )
+
   // Edge connection (drag from handle)
   const handleConnect = useCallback(
     (connection) => {
@@ -211,6 +236,9 @@ function App() {
             onEdgesChange={onEdgesChange}
             onNodeDoubleClick={handleNodeDoubleClick}
             onConnect={handleConnect}
+            onReconnectStart={handleReconnectStart}
+            onReconnect={handleReconnect}
+            onReconnectEnd={handleReconnectEnd}
             edgeTypes={edgeTypes}
           />
         </main>
